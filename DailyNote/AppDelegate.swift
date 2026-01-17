@@ -47,15 +47,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     // MARK: - Menu Bar Icon
     private func setupMenuBarIcon() {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         
         if let button = statusItem?.button {
-            // Use SF Symbol or custom image
-            if let image = NSImage(systemSymbolName: "drop.fill", accessibilityDescription: "DailyNote") {
-                image.isTemplate = true
-                button.image = image
-            } else {
-                button.title = "🦉"
+            // Use app icon for menu bar
+            if let appIcon = NSImage(named: NSImage.applicationIconName) {
+                let resizedIcon = NSImage(size: NSSize(width: 18, height: 18), flipped: false) { rect in
+                    appIcon.draw(in: rect)
+                    return true
+                }
+                resizedIcon.isTemplate = false
+                button.image = resizedIcon
             }
             button.action = #selector(menuBarIconClicked)
             button.target = self
