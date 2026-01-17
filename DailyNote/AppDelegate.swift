@@ -19,9 +19,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var eventMonitor: Any?
     private var localEventMonitor: Any?
     
+    // Menu Bar Icon
+    private var statusItem: NSStatusItem?
+    
     func applicationDidFinishLaunching(_ notification: Notification) {
         // Hide from dock
         NSApp.setActivationPolicy(.accessory)
+        
+        // Setup menu bar icon
+        setupMenuBarIcon()
         
         // Setup notification permissions
         notificationManager.requestPermission()
@@ -37,6 +43,80 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Schedule smart water reminders
         notificationManager.scheduleAllNotifications()
+    }
+    
+    // MARK: - Menu Bar Icon
+    private func setupMenuBarIcon() {
+        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
+        
+        if let button = statusItem?.button {
+            // Use SF Symbol or custom image
+            if let image = NSImage(systemSymbolName: "drop.fill", accessibilityDescription: "DailyNote") {
+                image.isTemplate = true
+                button.image = image
+            } else {
+                button.title = "🦉"
+            }
+            button.action = #selector(menuBarIconClicked)
+            button.target = self
+            button.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        }
+    }
+    
+    @objc private func menuBarIconClicked(_ sender: NSStatusBarButton) {
+        let event = NSApp.currentEvent!
+        
+        if event.type == .rightMouseUp {
+            // Right click - show menu
+            showStatusMenu()
+        } else {
+            // Left click - toggle popup
+            togglePopup()
+        }
+    }
+    
+    private func showStatusMenu() {
+        let menu = NSMenu()
+        
+        // Water progress
+        let waterProgress = dataManager.currentData.waterIntake
+        let waterGoal = dataManager.settings.waterGoal
+        menu.addItem(NSMenuItem(title: "Nước: \(waterProgress)/\(waterGoal)ml", action: nil, keyEquivalent: ""))
+        
+        // Task progress
+        let completed = dataManager.currentData.completedTasksCount
+        let total = dataManager.currentData.tasks.count
+        menu.addItem(NSMenuItem(title: "Tasks: \(completed)/\(total)", action: nil, keyEquivalent: ""))
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        // Toggle widget visibility
+        let widgetItem = NSMenuItem(title: widgetWindow.isVisible ? "Ẩn Widget" : "Hiện Widget", action: #selector(toggleWidgetVisibility), keyEquivalent: "w")
+        widgetItem.target = self
+        menu.addItem(widgetItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
+        // Quit
+        let quitItem = NSMenuItem(title: "Thoát", action: #selector(quitApp), keyEquivalent: "q")
+        quitItem.target = self
+        menu.addItem(quitItem)
+        
+        statusItem?.menu = menu
+        statusItem?.button?.performClick(nil)
+        statusItem?.menu = nil  // Reset so left click works again
+    }
+    
+    @objc private func toggleWidgetVisibility() {
+        if widgetWindow.isVisible {
+            widgetWindow.orderOut(nil)
+        } else {
+            widgetWindow.orderFrontRegardless()
+        }
+    }
+    
+    @objc private func quitApp() {
+        NSApp.terminate(nil)
     }
     
     private func setupWidgetWindow() {
