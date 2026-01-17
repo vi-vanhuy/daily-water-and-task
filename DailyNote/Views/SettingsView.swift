@@ -8,6 +8,10 @@ struct SettingsView: View {
     @ObservedObject var theme = ThemeManager.shared
     @ObservedObject var dataManager = DataManager.shared
     @Environment(\.dismiss) var dismiss
+    
+    // Optional callback for closing the view (useful when presented as a window)
+    var customCloseAction: (() -> Void)? = nil
+    
     @State private var nickname: String = ""
     @State private var workStartHour: Int = 9
     @State private var workEndHour: Int = 18
@@ -17,7 +21,13 @@ struct SettingsView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Header
-            SettingsHeader(onClose: { dismiss() })
+            SettingsHeader(onClose: {
+                if let action = customCloseAction {
+                    action()
+                } else {
+                    dismiss()
+                }
+            })
             
             ScrollView {
                 VStack(spacing: DS.Spacing.lg) {
@@ -187,24 +197,31 @@ struct GeneralSection: View {
     @Binding var launchAtLogin: Bool
     
     var body: some View {
-        VStack(alignment: .leading, spacing: DS.Spacing.md) {
-            SectionTitle(title: "Hệ thống", icon: "gearshape.fill")
-            
-            Toggle(isOn: $launchAtLogin) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Khởi động cùng máy")
-                        .font(DS.Typography.body)
-                        .foregroundColor(DS.Colors.textPrimary)
-                    
-                    Text("Tự động mở khi đăng nhập")
-                        .font(DS.Typography.small)
-                        .foregroundColor(DS.Colors.textTertiary)
-                }
+        HStack {
+            Image(systemName: "gearshape.fill")
+                .font(.system(size: 14))
+                .foregroundColor(DS.Colors.textSecondary)
+                
+            VStack(alignment: .leading, spacing: 0) {
+                Text("Khởi động cùng máy")
+                    .font(DS.Typography.body)
+                    .foregroundColor(DS.Colors.textPrimary)
             }
-            .toggleStyle(SwitchToggleStyle(tint: DS.Colors.accent))
+            
+            Spacer()
+            
+            Toggle("", isOn: $launchAtLogin)
+                .labelsHidden()
+                .toggleStyle(SwitchToggleStyle(tint: DS.Colors.accent))
+                .scaleEffect(0.8) // Make toggle slightly smaller
         }
-        .padding(DS.Spacing.md)
-        .cardStyle()
+        .padding(DS.Spacing.sm) // Reduced padding
+        .background(DS.Colors.surface)
+        .cornerRadius(DS.Radius.md)
+        .overlay(
+            RoundedRectangle(cornerRadius: DS.Radius.md)
+                .stroke(DS.Colors.surfaceLight, lineWidth: 1)
+        )
     }
 }
 

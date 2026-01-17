@@ -43,6 +43,55 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         // Schedule smart water reminders
         notificationManager.scheduleAllNotifications()
+        
+        // Check for first launch
+        checkFirstLaunch()
+    }
+    
+    private func checkFirstLaunch() {
+        let key = "hasLaunchedBefore"
+        if !UserDefaults.standard.bool(forKey: key) {
+            UserDefaults.standard.set(true, forKey: key)
+            
+            // First time launch - show Settings to encourage "Launch at Login"
+            // Wait a bit for app to settle
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                // Opening Settings is equivalent to right click context menu -> Settings
+                // But we don't have a direct method exposed easily. 
+                // Let's implement a showSettings method in AppDelegate that creates the view if needed.
+                self?.showSettingsWindow()
+            }
+        }
+    }
+    
+    // Manage settings window instance
+    private var settingsWindow: NSWindow?
+    
+    func showSettingsWindow() {
+        if settingsWindow == nil {
+            let settingsView = SettingsView()
+            let hostingView = NSHostingView(rootView: settingsView)
+            
+            let window = NSWindow(
+                contentRect: NSRect(x: 0, y: 0, width: 320, height: 600),
+                styleMask: [.titled, .closable, .fullSizeContentView],
+                backing: .buffered,
+                defer: false
+            )
+            window.title = "Cài đặt DailyNote"
+            window.center()
+            window.contentView = hostingView
+            window.isReleasedWhenClosed = false
+            window.titlebarAppearsTransparent = true
+            window.titleVisibility = .hidden
+            window.backgroundColor = .clear
+            window.isMovableByWindowBackground = true
+            
+            settingsWindow = window
+        }
+        
+        settingsWindow?.makeKeyAndOrderFront(nil)
+        NSApp.activate(ignoringOtherApps: true)
     }
     
     // MARK: - Menu Bar Icon
@@ -88,6 +137,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         
         menu.addItem(NSMenuItem.separator())
         
+        // Settings
+        let settingsItem = NSMenuItem(title: "Cài đặt", action: #selector(openSettings), keyEquivalent: ",")
+        settingsItem.target = self
+        menu.addItem(settingsItem)
+        
+        menu.addItem(NSMenuItem.separator())
+        
         // Toggle widget visibility
         let widgetItem = NSMenuItem(title: widgetWindow.isVisible ? "Ẩn Widget" : "Hiện Widget", action: #selector(toggleWidgetVisibility), keyEquivalent: "w")
         widgetItem.target = self
@@ -103,6 +159,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem?.menu = menu
         statusItem?.button?.performClick(nil)
         statusItem?.menu = nil  // Reset so left click works again
+    }
+    
+    @objc func openSettings() {
+        showSettingsWindow()
     }
     
     @objc private func toggleWidgetVisibility() {
