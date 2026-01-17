@@ -96,7 +96,7 @@ struct HeaderView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
-            // Top row: Logo + Mode indicator + Settings
+            // Top row: Logo + Mode indicator + Actions
             HStack {
                 // Owl icon that changes based on mode
                 owlIconView
@@ -134,6 +134,7 @@ struct HeaderView: View {
                         .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
+                .help("Cài đặt")
             }
             
             // Greeting message

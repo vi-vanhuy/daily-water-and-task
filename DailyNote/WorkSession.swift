@@ -19,10 +19,36 @@ class WorkSessionManager: ObservableObject {
     
     var profileManager: ProfileManager { ProfileManager.shared }
     
+    /// Check if current time is within work hours
+    var isWorkHours: Bool {
+        let now = Date()
+        let hour = Calendar.current.component(.hour, from: now)
+        let startHour = profileManager.profile.workStartHour
+        let endHour = profileManager.profile.workEndHour
+        return hour >= startHour && hour < endHour
+    }
+    
     init() {
         loadRoutines()
         loadSession()
         startTimer()
+        checkWorkHours()
+    }
+    
+    /// Check current time and auto-start/stop work session
+    func checkWorkHours() {
+        if isWorkHours && !isWorking {
+            // Auto-start if within work hours
+            startWorkSession()
+        } else if !isWorkHours && isWorking {
+            // Auto-end if outside work hours
+            endWorkSession()
+        }
+        
+        // Update remaining time if working
+        if isWorking {
+            updateRemainingTime()
+        }
     }
     
     // MARK: - Work Session

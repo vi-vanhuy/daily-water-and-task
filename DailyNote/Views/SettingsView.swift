@@ -78,13 +78,7 @@ struct SettingsView: View {
         .onChange(of: workEndHour) { newValue in
             profileManager.profile.workEndHour = newValue
         }
-        .onChange(of: selectedTone) { newValue in
-            profileManager.profile.tone = newValue
-            // Immediately update theme
-            withAnimation(.easeInOut(duration: 0.3)) {
-                theme.updateTheme()
-            }
-        }
+        // Note: selectedTone is only applied when user clicks "Lưu cài đặt"
     }
     
     private func loadProfile() {
@@ -111,6 +105,9 @@ struct SettingsView: View {
         
         // Reschedule notifications
         NotificationManager.shared.scheduleAllNotifications()
+        
+        // Update work session timer based on new work hours
+        WorkSessionManager.shared.checkWorkHours()
         
         // Show saved feedback
         withAnimation {
@@ -282,10 +279,13 @@ struct HourPicker: View {
         Picker("", selection: $hour) {
             ForEach(0..<24, id: \.self) { h in
                 Text(String(format: "%02d:00", h))
+                    .foregroundColor(DS.Colors.textPrimary)
                     .tag(h)
             }
         }
         .pickerStyle(.menu)
+        .accentColor(DS.Colors.textPrimary)
+        .foregroundColor(DS.Colors.textPrimary)
         .frame(maxWidth: .infinity)
         .padding(.vertical, DS.Spacing.xs)
         .background(DS.Colors.surfaceLight)

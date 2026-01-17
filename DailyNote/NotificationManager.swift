@@ -3,6 +3,7 @@
 
 import Foundation
 import UserNotifications
+import AppKit
 
 class NotificationManager: ObservableObject {
     static let shared = NotificationManager()
@@ -198,6 +199,64 @@ class NotificationManager: ObservableObject {
         return ids
     }
     
+    // MARK: - Notification Icon Based on Tone
+    
+    /// Get icon name based on current tone context
+    private func getIconNameForCurrentTone() -> String {
+        let context = SmartToneEngine.shared.getCurrentContext()
+        switch context {
+        case .relaxed:
+            return "owl_relaxed"
+        case .work:
+            return "owl_work"
+        case .stressed:
+            return "owl_stressed"
+        }
+    }
+    
+    /// Create notification attachment with icon based on current tone
+    private func getNotificationAttachment() -> UNNotificationAttachment? {
+        let iconName = getIconNameForCurrentTone()
+        
+        // Get image from Assets
+        guard let image = NSImage(named: iconName) else {
+            print("Could not find image: \(iconName)")
+            return nil
+        }
+        
+        // Create temporary file for attachment
+        let tempDir = FileManager.default.temporaryDirectory
+        let iconPath = tempDir.appendingPathComponent("\(iconName)_\(UUID().uuidString).png")
+        
+        // Convert NSImage to PNG data and save
+        guard let tiffData = image.tiffRepresentation,
+              let bitmap = NSBitmapImageRep(data: tiffData),
+              let pngData = bitmap.representation(using: .png, properties: [:]) else {
+            print("Could not convert image to PNG")
+            return nil
+        }
+        
+        do {
+            try pngData.write(to: iconPath)
+            let attachment = try UNNotificationAttachment(
+                identifier: "icon",
+                url: iconPath,
+                options: [UNNotificationAttachmentOptionsTypeHintKey: "public.png"]
+            )
+            return attachment
+        } catch {
+            print("Failed to create notification attachment: \(error)")
+            return nil
+        }
+    }
+    
+    /// Add icon attachment to notification content
+    private func addIconToContent(_ content: UNMutableNotificationContent) {
+        if let attachment = getNotificationAttachment() {
+            content.attachments = [attachment]
+        }
+    }
+    
     // MARK: - Immediate Water Reminder (for testing)
     func sendImmediateWaterReminder() {
         guard isAuthorized else { return }
@@ -234,8 +293,11 @@ class NotificationManager: ObservableObject {
         guard isAuthorized else { return }
         
         let content = UNMutableNotificationContent()
-        content.title = "Nhắc việc"
-        content.body = task.title
+        
+        // Use SmartToneEngine for personalized task message
+        let (title, body) = SmartToneEngine.shared.getTaskReminderMessage(taskTitle: task.title)
+        content.title = title
+        content.body = body
         content.sound = .default
         content.categoryIdentifier = "TASK_REMINDER"
         

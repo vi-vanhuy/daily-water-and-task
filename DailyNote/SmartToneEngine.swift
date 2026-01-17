@@ -214,36 +214,168 @@ class SmartToneEngine {
     }
     
     // ═══════════════════════════════════════════════════════════════════════════
-    // MARK: - TASK REMINDER MESSAGES (3 per tone = 9 total)
+    // MARK: - TASK REMINDER MESSAGES (30 total: 10 per tone)
+    // Based on: Tone → Time of day → Progress
     // ═══════════════════════════════════════════════════════════════════════════
     
     func getTaskReminderMessage(taskTitle: String) -> (title: String, body: String) {
         let context = getCurrentContext()
+        let hour = Calendar.current.component(.hour, from: Date())
+        let name = profileManager.profile.displayName
+        
+        // Calculate progress
+        let tasks = dataManager.currentData.tasks
+        let total = tasks.count
+        let completed = tasks.filter { $0.isCompleted }.count
+        let progress: Double = total > 0 ? Double(completed) / Double(total) : 0
+        
+        // Determine time period
+        let timePeriod: TimePeriod
+        if hour >= 5 && hour < 12 {
+            timePeriod = .morning
+        } else if hour >= 12 && hour < 14 {
+            timePeriod = .noon
+        } else if hour >= 14 && hour < 18 {
+            timePeriod = .afternoon
+        } else {
+            timePeriod = .evening
+        }
+        
+        // Determine progress level
+        let progressLevel: ProgressLevel
+        if progress == 0 {
+            progressLevel = .notStarted
+        } else if progress < 0.5 {
+            progressLevel = .belowHalf
+        } else if progress < 1 {
+            progressLevel = .aboveHalf
+        } else {
+            progressLevel = .almostDone
+        }
         
         switch context {
         case .relaxed:
-            let messages: [(String, String)] = [
-                ("Nhắc nhẹ", "Rảnh tay rồi đó, làm \"\(taskTitle)\" cũng được."),
-                ("Gợi ý", "Nếu muốn, mình xử lý \"\(taskTitle)\" nhé."),
-                ("Khi nào tiện", "Việc \"\(taskTitle)\" đang chờ, không gấp đâu.")
-            ]
-            return selectMessage(messages)
-            
+            return getRelaxedTaskMessage(task: taskTitle, name: name, time: timePeriod, progress: progressLevel)
         case .work:
-            let messages: [(String, String)] = [
-                ("Nhắc việc", "Đến giờ: \(taskTitle)"),
-                ("Task", "\"\(taskTitle)\" - Đến lúc làm rồi."),
-                ("Reminder", "Lịch: \(taskTitle). Bắt đầu nhé.")
-            ]
-            return selectMessage(messages)
-            
+            return getWorkTaskMessage(task: taskTitle, time: timePeriod, progress: progressLevel, remaining: total - completed)
         case .stressed:
-            let messages: [(String, String)] = [
-                ("Việc này!", "Ê, \"\(taskTitle)\" - để nữa là toang đó."),
-                ("Làm ngay", "\"\(taskTitle)\" - Né hoài không giải quyết được."),
-                ("Không đùa", "\"\(taskTitle)\". Làm. Xong. Ngay.")
-            ]
-            return selectMessage(messages)
+            return getStressedTaskMessage(task: taskTitle, time: timePeriod, progress: progressLevel, remaining: total - completed)
+        }
+    }
+    
+    private enum TimePeriod {
+        case morning, noon, afternoon, evening
+    }
+    
+    private enum ProgressLevel {
+        case notStarted, belowHalf, aboveHalf, almostDone
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // MARK: - VUI VẺ (Relaxed) - 10 messages
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    private func getRelaxedTaskMessage(task: String, name: String, time: TimePeriod, progress: ProgressLevel) -> (String, String) {
+        switch (time, progress) {
+        // MORNING
+        case (.morning, .notStarted):
+            return ("Chào buổi sáng!", "Hey \(name)! Bắt đầu ngày mới với \"\(task)\" nhé~")
+        case (.morning, .belowHalf):
+            return ("Sáng đẹp quá!", "\(name) ơi, làm \"\(task)\" rồi đi ăn sáng nè~")
+        case (.morning, .aboveHalf), (.morning, .almostDone):
+            return ("Wow!", "Làm tốt lắm \(name)! \"\(task)\" tiếp nha, gần xong rồi~")
+            
+        // NOON
+        case (.noon, .notStarted):
+            return ("Giờ trưa rồi!", "\(name) à, ăn trưa xong làm \"\(task)\" nha~")
+        case (.noon, .belowHalf):
+            return ("Nghỉ trưa chưa?", "Nếu rảnh thì \"\(task)\" đang chờ đó \(name)~")
+        case (.noon, _):
+            return ("Chiều nay nhẹ nhàng", "\"\(task)\" thôi, từ từ làm không vội~")
+            
+        // AFTERNOON
+        case (.afternoon, .notStarted):
+            return ("Chiều rồi nè!", "\(name) ơi, uống cafe xong làm \"\(task)\" đi~")
+        case (.afternoon, _):
+            return ("Chill afternoon", "Thư thả làm \"\(task)\" nha \(name)~")
+            
+        // EVENING
+        case (.evening, .almostDone):
+            return ("Tối rồi!", "Làm nốt \"\(task)\" rồi nghỉ ngơi nè \(name)~")
+        case (.evening, _):
+            return ("Cuối ngày", "Nếu còn sức, xử lý \"\(task)\" nhé~ Không thì mai cũng được!")
+        }
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // MARK: - CÔNG VIỆC (Work) - 10 messages
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    private func getWorkTaskMessage(task: String, time: TimePeriod, progress: ProgressLevel, remaining: Int) -> (String, String) {
+        switch (time, progress) {
+        // MORNING
+        case (.morning, .notStarted):
+            return ("Nhắc việc", "Task: \"\(task)\" - Bắt đầu ngày làm việc.")
+        case (.morning, .belowHalf):
+            return ("Reminder", "Đến giờ: \"\(task)\". Còn \(remaining) việc cần hoàn thành.")
+        case (.morning, .aboveHalf), (.morning, .almostDone):
+            return ("Tiến độ tốt", "\"\(task)\" - Tiếp tục duy trì nhịp độ.")
+            
+        // NOON
+        case (.noon, .notStarted):
+            return ("Task pending", "\"\(task)\" chưa bắt đầu. Schedule: bây giờ.")
+        case (.noon, .belowHalf):
+            return ("Midday check", "\"\(task)\". \(remaining) tasks còn lại trong ngày.")
+        case (.noon, _):
+            return ("Update", "\"\(task)\" - Tiến độ trên 50%. Keep going.")
+            
+        // AFTERNOON
+        case (.afternoon, .notStarted):
+            return ("Action needed", "\"\(task)\" - Chưa hoàn thành. Bắt đầu ngay.")
+        case (.afternoon, _):
+            return ("Focus", "\"\(task)\". Target: hoàn thành trước hết giờ làm việc.")
+            
+        // EVENING
+        case (.evening, .almostDone):
+            return ("Gần xong", "Chỉ còn \"\(task)\". Hoàn thành để đóng ngày.")
+        case (.evening, _):
+            return ("End of day", "\"\(task)\" - Deadline approaching. \(remaining) remaining.")
+        }
+    }
+    
+    // ═══════════════════════════════════════════════════════════════════════════
+    // MARK: - ĐỪNG ĐỤNG VÀO TAO (Stressed) - 10 messages
+    // ═══════════════════════════════════════════════════════════════════════════
+    
+    private func getStressedTaskMessage(task: String, time: TimePeriod, progress: ProgressLevel, remaining: Int) -> (String, String) {
+        switch (time, progress) {
+        // MORNING
+        case (.morning, .notStarted):
+            return ("Dậy chưa?", "\"\(task)\" - Làm ngay. Đừng để dồn lại.")
+        case (.morning, .belowHalf):
+            return ("Ê!", "\"\(task)\" đang chờ. \(remaining) việc còn lại. Nhanh lên.")
+        case (.morning, .aboveHalf), (.morning, .almostDone):
+            return ("Được đấy", "\"\(task)\" - Làm nốt. Đừng mất momentum.")
+            
+        // NOON
+        case (.noon, .notStarted):
+            return ("Trưa rồi!", "\"\(task)\" chưa động tới? Bắt đầu ngay không hết ngày.")
+        case (.noon, .belowHalf):
+            return ("Cảnh báo", "Chưa được nửa mà trưa rồi. \"\(task)\". NOW.")
+        case (.noon, _):
+            return ("Tiếp đi", "\"\(task)\" - Đừng nghỉ. Xong rồi hãy thở.")
+            
+        // AFTERNOON
+        case (.afternoon, .notStarted):
+            return ("CHIỀU RỒI!", "\"\(task)\" - Để nữa là toang. Làm. Ngay.")
+        case (.afternoon, _):
+            return ("Hết giờ đến nơi", "\"\(task)\". \(remaining) việc. Không đùa được nữa.")
+            
+        // EVENING
+        case (.evening, .almostDone):
+            return ("Cuối cùng", "\"\(task)\" - Task cuối. Xong là hết. Làm đi.")
+        case (.evening, _):
+            return ("Tối rồi đó", "\"\(task)\" - Hoặc làm xong hoặc mai lại stress. Chọn đi.")
         }
     }
     

@@ -2,6 +2,7 @@
 // Centralized design tokens for DailyNote with dynamic theme support
 
 import SwiftUI
+import AppKit
 
 // MARK: - Theme Mode
 enum ThemeMode {
@@ -20,19 +21,40 @@ class ThemeManager: ObservableObject {
     var isRelaxedMode: Bool { currentMode == .relaxed }
     
     func updateTheme() {
-        let context = SmartToneEngine.shared.getCurrentContext()
         let profile = ProfileManager.shared.profile
         
-        // If user selected "Đừng đụng vào tao" tone, always use stressed mode
-        if profile.isHarshModeEnabled {
-            currentMode = .stressed
-        } else if context == .stressed {
-            // Auto-detect stressed context
-            currentMode = .stressed
-        } else if context == .relaxed {
+        // Use user-selected tone directly
+        switch profile.tone {
+        case .calm:       // Vui vẻ
             currentMode = .relaxed
-        } else {
+        case .focus:      // Công việc
             currentMode = .normal
+        case .friendly:   // Đừng đụng vào tao
+            currentMode = .stressed
+        }
+        
+        // Update app icon to match theme
+        updateAppIcon()
+        
+        // Force UI refresh
+        objectWillChange.send()
+    }
+    
+    // MARK: - Dynamic App Icon
+    private func updateAppIcon() {
+        let iconName: String
+        switch currentMode {
+        case .relaxed:
+            iconName = "owl_relaxed"
+        case .stressed:
+            iconName = "owl_stressed"
+        case .normal:
+            iconName = "owl_work"
+        }
+        
+        // Set app icon dynamically
+        if let image = NSImage(named: iconName) {
+            NSApp.applicationIconImage = image
         }
     }
 }
@@ -83,26 +105,26 @@ struct DS {
         static let accentOrange = Color(hex: "FF9500")
         static let accentGreen = Color(hex: "4CAF50")
         
-        // Text
+        // Text - optimized for contrast with each theme's background
         static var textPrimary: Color {
             switch theme.currentMode {
-            case .stressed: return Color(hex: "FFFFFF")
-            case .relaxed: return Color(hex: "4A3B2A")   // Warm brown
-            case .normal: return Color(hex: "2D2A26")
+            case .stressed: return Color(hex: "F5F5F5")    // Bright white for dark bg
+            case .relaxed: return Color(hex: "2C1810")     // Very dark brown for cream bg
+            case .normal: return Color(hex: "1A1A1A")      // Near black for light bg
             }
         }
         static var textSecondary: Color {
             switch theme.currentMode {
-            case .stressed: return Color(hex: "AAAAAA")
-            case .relaxed: return Color(hex: "7A6B5A")   // Soft brown
-            case .normal: return Color(hex: "6B5E4A")
+            case .stressed: return Color(hex: "B0B0B0")    // Light grey for dark bg
+            case .relaxed: return Color(hex: "4A3728")     // Medium dark brown
+            case .normal: return Color(hex: "4A4A4A")      // Medium grey
             }
         }
         static var textTertiary: Color {
             switch theme.currentMode {
-            case .stressed: return Color(hex: "777777")
-            case .relaxed: return Color(hex: "A79B8A")   // Light brown
-            case .normal: return Color(hex: "9C8B73")
+            case .stressed: return Color(hex: "808080")    // Medium grey for dark bg
+            case .relaxed: return Color(hex: "6B5744")     // Muted brown
+            case .normal: return Color(hex: "6B6B6B")      // Light grey
             }
         }
         

@@ -213,38 +213,38 @@ class DataManager: ObservableObject {
         let workHours = endHour - startHour
         
         // Science-based water intake schedule
-        // Total ~2000ml distributed throughout the day
+        // Total = 2000ml distributed throughout the day
         var schedule: [(hour: Int, minute: Int, amount: Int, label: String)] = []
         
-        // Early morning (before work or at start)
+        // Early morning (before work or at start) - 300ml
         schedule.append((startHour, 0, 300, "Sáng sớm - hydrate sau giấc ngủ"))
         
-        // Mid-morning
+        // Mid-morning - 300ml
         let midMorning = startHour + max(1, workHours / 4)
-        schedule.append((midMorning, 30, 250, "Giữa buổi sáng"))
+        schedule.append((midMorning, 30, 300, "Giữa buổi sáng"))
         
-        // Before lunch (around noon)
+        // Before lunch (around noon) - 250ml
         let beforeLunch = min(12, startHour + workHours / 2)
         schedule.append((beforeLunch, 0, 250, "Trước bữa trưa"))
         
-        // After lunch
-        schedule.append((13, 30, 200, "Sau bữa trưa - giúp tiêu hóa"))
+        // After lunch - 300ml
+        schedule.append((13, 30, 300, "Sau bữa trưa - giúp tiêu hóa"))
         
-        // Afternoon
+        // Afternoon - 300ml
         let afternoon = 15
         if afternoon < endHour {
-            schedule.append((afternoon, 0, 250, "Buổi chiều"))
+            schedule.append((afternoon, 0, 300, "Buổi chiều"))
         }
         
-        // Late afternoon
+        // Late afternoon - 300ml
         let lateAfternoon = min(17, endHour - 1)
         if lateAfternoon > 15 && lateAfternoon < endHour {
-            schedule.append((lateAfternoon, 0, 250, "Cuối buổi chiều"))
+            schedule.append((lateAfternoon, 0, 300, "Cuối buổi chiều"))
         }
         
-        // Before dinner / end of work
+        // Before dinner / end of work - 250ml (nhẹ hơn để không ảnh hưởng giấc ngủ)
         if endHour >= 18 {
-            schedule.append((endHour, 0, 200, "Kết thúc ngày làm việc"))
+            schedule.append((endHour, 0, 250, "Kết thúc ngày làm việc"))
         }
         
         // Create goals

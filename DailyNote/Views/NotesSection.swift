@@ -95,18 +95,26 @@ struct TaskInputCard: View {
     var body: some View {
         VStack(spacing: DS.Spacing.sm) {
             HStack(spacing: DS.Spacing.sm) {
-                TextField("Thêm công việc...", text: $newTaskText)
-                    .textFieldStyle(.plain)
-                    .font(DS.Typography.body)
-                    .foregroundColor(DS.Colors.textPrimary)
-                    .padding(DS.Spacing.sm)
-                    .background(DS.Colors.surfaceLight)
-                    .cornerRadius(DS.Radius.sm)
-                    .onSubmit {
-                        if !newTaskText.isEmpty {
-                            onAdd()
-                        }
+                // Custom TextField with controlled placeholder color
+                ZStack(alignment: .leading) {
+                    if newTaskText.isEmpty {
+                        Text("Thêm công việc...")
+                            .font(DS.Typography.body)
+                            .foregroundColor(DS.Colors.textTertiary)
                     }
+                    TextField("", text: $newTaskText)
+                        .textFieldStyle(.plain)
+                        .font(DS.Typography.body)
+                        .foregroundColor(DS.Colors.textPrimary)
+                        .onSubmit {
+                            if !newTaskText.isEmpty {
+                                onAdd()
+                            }
+                        }
+                }
+                .padding(DS.Spacing.sm)
+                .background(DS.Colors.surfaceLight)
+                .cornerRadius(DS.Radius.sm)
                 
                 // Time toggle
                 Button(action: { 
@@ -130,10 +138,12 @@ struct TaskInputCard: View {
                     }
                     .padding(.horizontal, DS.Spacing.sm)
                     .padding(.vertical, DS.Spacing.xs)
-                    .background(showTimePicker ? DS.Colors.accent.opacity(0.15) : .clear)
+                    .background(showTimePicker ? DS.Colors.accent.opacity(0.15) : DS.Colors.surfaceLight)
                     .cornerRadius(DS.Radius.sm)
+                    .contentShape(Rectangle())
                 }
                 .buttonStyle(.plain)
+                .frame(minWidth: 44, minHeight: 32)
                 
                 // Add button
                 Button(action: onAdd) {
@@ -220,6 +230,21 @@ struct QuickTimeButton: View {
 struct TasksListCard: View {
     @ObservedObject var dataManager = DataManager.shared
     
+    // Tasks sorted by scheduled time
+    private var sortedTasks: [TaskItem] {
+        dataManager.currentData.tasks.sorted { task1, task2 in
+            // Tasks with time come before tasks without time
+            guard let time1 = task1.scheduledTime else {
+                return false // task1 without time goes after task2
+            }
+            guard let time2 = task2.scheduledTime else {
+                return true // task1 with time goes before task2 without time
+            }
+            // Both have time - sort by time
+            return time1 < time2
+        }
+    }
+    
     var body: some View {
         VStack(alignment: .leading, spacing: DS.Spacing.sm) {
             HStack {
@@ -245,7 +270,7 @@ struct TasksListCard: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, DS.Spacing.lg)
             } else {
-                ForEach(dataManager.currentData.tasks) { task in
+                ForEach(sortedTasks) { task in
                     TaskRow(task: task)
                 }
             }

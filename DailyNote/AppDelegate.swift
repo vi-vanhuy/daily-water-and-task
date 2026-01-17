@@ -41,11 +41,29 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Monitor for clicks outside popup to close it
         setupEventMonitor()
         
+        // Setup keyboard shortcut monitor (intercept Cmd+Q)
+        setupKeyboardMonitor()
+        
         // Schedule smart water reminders
         notificationManager.scheduleAllNotifications()
         
         // Check for first launch
         checkFirstLaunch()
+    }
+    
+    // Intercept Cmd+Q to hide popup instead of quitting
+    private var keyboardMonitor: Any?
+    
+    private func setupKeyboardMonitor() {
+        keyboardMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            // Check for Cmd+Q
+            if event.modifierFlags.contains(.command) && event.charactersIgnoringModifiers == "q" {
+                // Hide popup instead of quitting
+                self?.hidePopup()
+                return nil // Consume the event
+            }
+            return event
+        }
     }
     
     private func checkFirstLaunch() {
@@ -117,8 +135,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // Right click - show menu
             showStatusMenu()
         } else {
-            // Left click - toggle popup
-            togglePopup()
+            // Left click - show widget (popup is opened by clicking widget)
+            showWidget()
+        }
+    }
+    
+    // Show widget if hidden
+    func showWidget() {
+        if !widgetWindow.isVisible {
+            widgetWindow.orderFrontRegardless()
         }
     }
     
@@ -173,14 +198,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
     
+    // Public method to hide widget from WidgetView
+    func hideWidget() {
+        widgetWindow.orderOut(nil)
+    }
+    
     @objc private func quitApp() {
         NSApp.terminate(nil)
     }
     
     private func setupWidgetWindow() {
-        let widgetView = WidgetView(onTap: { [weak self] in
-            self?.togglePopup()
-        })
+        let widgetView = WidgetView(
+            onTap: { [weak self] in
+                self?.togglePopup()
+            },
+            onHide: { [weak self] in
+                self?.hideWidget()
+            }
+        )
         
         let hostingView = NSHostingView(rootView: widgetView)
         hostingView.frame = NSRect(x: 0, y: 0, width: 200, height: 80)
@@ -318,6 +353,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             NSEvent.removeMonitor(monitor)
         }
         if let monitor = localEventMonitor {
+            NSEvent.removeMonitor(monitor)
+        }
+        if let monitor = keyboardMonitor {
             NSEvent.removeMonitor(monitor)
         }
     }
