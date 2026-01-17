@@ -1,0 +1,17 @@
+# Xcode
+build/
+*.xcuserstate
+*.xcworkspacedata
+xcuserdata/
+DerivedData/
+
+# macOS
+.DS_Store
+*.swp
+
+# App bundle (can be built from source)
+*.app/
+
+# Distribution
+*.zip
+*.dmg

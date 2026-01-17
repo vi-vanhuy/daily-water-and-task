@@ -1,0 +1,24 @@
+<?xml version="1.0" standalone="no"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad-owl-relaxed" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#e5d848"/>
+      <stop offset="100%" stop-color="#a77272"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="110" ry="110" fill="url(#grad-owl-relaxed)"/>
+  <path d="M 76 512 C 76 256, 106 106, 256 106 C 406 106, 436 256, 436 512 Z" fill="#F8FAFC" opacity="0.9"/>
+  <path d="M 157 155 L 117 105 L 97 216 Z" fill="#E2E8F0"/>
+  <path d="M 355 155 L 395 105 L 415 216 Z" fill="#E2E8F0"/>
+  <circle cx="177" cy="236" r="71" fill="white"/>
+  <circle cx="335" cy="236" r="71" fill="white"/>
+  <circle cx="177" cy="236" r="60.35" fill="#FFD700"/>
+  <circle cx="335" cy="236" r="60.35" fill="#FFD700"/>
+  <circle cx="177" cy="236" r="50" fill="#0F172A"/>
+  <circle cx="335" cy="236" r="50" fill="#0F172A"/>
+  <circle cx="198.3" cy="214.7" r="17.75" fill="white" opacity="0.8"/>
+  <circle cx="356.3" cy="214.7" r="17.75" fill="white" opacity="0.8"/>
+  <path d="M 106 256 Q 177 196 248 256 L 248 327 L 106 327 Z" fill="#F8FAFC"/>
+  <path d="M 264 256 Q 335 196 406 256 L 406 327 L 264 327 Z" fill="#F8FAFC"/>
+  <path d="M 216 271.5 L 296 271.5 L 256 331.5 Z" fill="#F97316" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+</svg>

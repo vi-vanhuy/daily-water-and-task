@@ -1,0 +1,22 @@
+<?xml version="1.0" standalone="no"?>
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad-owl-logo" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#0F172A"/>
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="512" height="512" rx="110" ry="110" fill="url(#grad-owl-logo)"/>
+  <path d="M 76 512 C 76 256, 106 106, 256 106 C 406 106, 436 256, 436 512 Z" fill="#F8FAFC" opacity="0.9"/>
+  <path d="M 166 141 L 126 91 L 106 216 Z" fill="#E2E8F0"/>
+  <path d="M 346 141 L 386 91 L 406 216 Z" fill="#E2E8F0"/>
+  <circle cx="186" cy="236" r="85" fill="white"/>
+  <circle cx="326" cy="236" r="85" fill="white"/>
+  <circle cx="186" cy="236" r="72.25" fill="#FFD700"/>
+  <circle cx="326" cy="236" r="72.25" fill="#FFD700"/>
+  <circle cx="186" cy="236" r="40" fill="#0F172A"/>
+  <circle cx="326" cy="236" r="40" fill="#0F172A"/>
+  <circle cx="211.5" cy="210.5" r="21.25" fill="white" opacity="0.8"/>
+  <circle cx="351.5" cy="210.5" r="21.25" fill="white" opacity="0.8"/>
+  <path d="M 216 278.5 L 296 278.5 L 256 338.5 Z" fill="#F97316" stroke="#0F172A" stroke-width="2" stroke-linejoin="round"/>
+</svg>
