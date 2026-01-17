@@ -279,6 +279,8 @@ struct TaskRow: View {
                             .frame(width: 12, height: 12)
                     }
                 }
+                .frame(width: 32, height: 32) // Larger tap area
+                .contentShape(Rectangle()) // Make entire frame tappable
             }
             .buttonStyle(.plain)
             

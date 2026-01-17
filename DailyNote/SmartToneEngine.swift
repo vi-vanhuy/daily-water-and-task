@@ -59,6 +59,34 @@ class SmartToneEngine {
         return .work
     }
     
+    // MARK: - Get Icon Name Based on Context
+    /// Returns the appropriate icon name based on current stress level
+    /// - "owl_relaxed" for relaxed/work contexts
+    /// - "owl_stressed" for stressed context
+    func getIconName() -> String {
+        let context = getCurrentContext()
+        switch context {
+        case .relaxed, .work:
+            return "owl_relaxed"
+        case .stressed:
+            return "owl_stressed"
+        }
+    }
+    
+    // MARK: - Get Theme Mode for UI
+    /// Converts ContextTone to ThemeMode for UI components
+    func getThemeMode() -> ThemeMode {
+        let context = getCurrentContext()
+        switch context {
+        case .relaxed:
+            return .relaxed
+        case .work:
+            return .normal
+        case .stressed:
+            return .stressed
+        }
+    }
+    
     // MARK: - Stress Level Calculation (0.0 - 1.0)
     private func calculateStressLevel() -> Double {
         let tasks = dataManager.currentData.tasks

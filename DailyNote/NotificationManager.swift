@@ -202,6 +202,11 @@ class NotificationManager: ObservableObject {
     func sendImmediateWaterReminder() {
         guard isAuthorized else { return }
         
+        // Update theme to match current context
+        DispatchQueue.main.async {
+            ThemeManager.shared.updateTheme()
+        }
+        
         let hour = Calendar.current.component(.hour, from: Date())
         let suggestedAmount = calculateSuggestedWaterAmount(
             hour: hour,
