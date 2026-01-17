@@ -6,6 +6,7 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var profileManager = ProfileManager.shared
     @ObservedObject var theme = ThemeManager.shared
+    @ObservedObject var dataManager = DataManager.shared
     @Environment(\.dismiss) var dismiss
     @State private var nickname: String = ""
     @State private var workStartHour: Int = 9
@@ -20,6 +21,9 @@ struct SettingsView: View {
             
             ScrollView {
                 VStack(spacing: DS.Spacing.lg) {
+                    // General Section
+                    GeneralSection(launchAtLogin: $dataManager.settings.launchAtLogin)
+                    
                     // Profile Section
                     ProfileSection(
                         nickname: $nickname,
@@ -44,14 +48,19 @@ struct SettingsView: View {
                 .padding(DS.Spacing.md)
             }
         }
-        .frame(width: 320, height: 500)
+        .frame(width: 320, height: 600) // Increased height for new section
         .background(DS.Colors.background)
         .cornerRadius(DS.Radius.xl)
         .onAppear {
             loadProfile()
+            // Sync launch at login status with system
+            dataManager.settings.launchAtLogin = LaunchHelper.shared.isEnabled
         }
         .onChange(of: nickname) { newValue in
             profileManager.profile.nickname = newValue
+        }
+        .onChange(of: dataManager.settings.launchAtLogin) { newValue in
+            LaunchHelper.shared.isEnabled = newValue
         }
         .onChange(of: workStartHour) { newValue in
             profileManager.profile.workStartHour = newValue
@@ -81,6 +90,9 @@ struct SettingsView: View {
         profileManager.profile.workStartHour = workStartHour
         profileManager.profile.workEndHour = workEndHour
         profileManager.profile.tone = selectedTone
+        
+        // Settings are autosaved by DataManager when changed
+        // Just trigger theme update and notification reschedule
         
         // Update theme with animation
         withAnimation(.easeInOut(duration: 0.5)) {
@@ -167,6 +179,32 @@ struct SettingsHeader: View {
         }
         .padding(DS.Spacing.lg)
         .background(DS.Colors.surface)
+    }
+}
+
+// MARK: - General Section
+struct GeneralSection: View {
+    @Binding var launchAtLogin: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DS.Spacing.md) {
+            SectionTitle(title: "Hệ thống", icon: "gearshape.fill")
+            
+            Toggle(isOn: $launchAtLogin) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("Khởi động cùng máy")
+                        .font(DS.Typography.body)
+                        .foregroundColor(DS.Colors.textPrimary)
+                    
+                    Text("Tự động mở khi đăng nhập")
+                        .font(DS.Typography.small)
+                        .foregroundColor(DS.Colors.textTertiary)
+                }
+            }
+            .toggleStyle(SwitchToggleStyle(tint: DS.Colors.accent))
+        }
+        .padding(DS.Spacing.md)
+        .cardStyle()
     }
 }
 
