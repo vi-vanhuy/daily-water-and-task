@@ -136,15 +136,15 @@ class NotificationManager: ObservableObject {
     private func getCalmWaterMessage(hour: Int, amount: Int) -> (String, String) {
         switch hour {
         case 6..<10:
-            return ("💧 Uống nước", "Bắt đầu ngày mới với \(amount)ml nước.")
+            return ("Uống nước", "Bắt đầu ngày mới với \(amount)ml nước.")
         case 10..<12:
-            return ("💧 Nghỉ ngơi", "Uống \(amount)ml nước, thư giãn một chút.")
+            return ("Nghỉ ngơi", "Uống \(amount)ml nước, thư giãn một chút.")
         case 12..<14:
-            return ("💧 Giờ trưa", "\(amount)ml nước trước bữa ăn.")
+            return ("Giờ trưa", "\(amount)ml nước trước bữa ăn.")
         case 14..<17:
-            return ("💧 Buổi chiều", "Nhấp một ngụm, \(amount)ml.")
+            return ("Buổi chiều", "Nhấp một ngụm, \(amount)ml.")
         default:
-            return ("💧 Cuối ngày", "\(amount)ml nước cuối cùng.")
+            return ("Cuối ngày", "\(amount)ml nước cuối cùng.")
         }
     }
     
@@ -153,7 +153,7 @@ class NotificationManager: ObservableObject {
         let goal = DataManager.shared.settings.waterGoal
         let remaining = max(0, goal - current)
         
-        return ("💧 Uống nước", "Uống \(amount)ml. Còn \(remaining)ml để đạt mục tiêu.")
+        return ("Uống nước", "Uống \(amount)ml. Còn \(remaining)ml để đạt mục tiêu.")
     }
     
     private func getFriendlyWaterMessage(hour: Int, amount: Int, name: String) -> (String, String) {
@@ -163,26 +163,26 @@ class NotificationManager: ObservableObject {
         
         switch hour {
         case 6..<10:
-            return ("☀️ Chào buổi sáng!", "Nạp \(amount)ml nước đi \(name)! Khởi động ngày mới 💪")
+            return ("Chào buổi sáng!", "Nạp \(amount)ml nước đi \(name)! Khởi động ngày mới ")
         case 10..<12:
             if progress < 0.3 {
-                return ("💧 Nhắc nhẹ nè!", "\(name) ơi, uống \(amount)ml đi, còn ít lắm 😅")
+                return ("Nhắc nhẹ nè!", "\(name) ơi, uống \(amount)ml đi, còn ít lắm ")
             } else {
-                return ("💧 Giỏi lắm!", "Tiếp tục uống \(amount)ml nha \(name)! ✨")
+                return ("Giỏi lắm!", "Tiếp tục uống \(amount)ml nha \(name)! ")
             }
         case 12..<14:
-            return ("🍜 Giờ nghỉ trưa", "Uống \(amount)ml trước/sau bữa ăn nha!")
+            return (" Giờ nghỉ trưa", "Uống \(amount)ml trước/sau bữa ăn nha!")
         case 14..<17:
             if progress >= 0.7 {
-                return ("💧 Sắp đủ rồi!", "Chỉ còn một chút nữa thôi \(name)! 🎉")
+                return ("Sắp đủ rồi!", "Chỉ còn một chút nữa thôi \(name)! ")
             } else {
-                return ("💧 Chiều rồi!", "\(name) ơi, \(amount)ml nè!")
+                return ("Chiều rồi!", "\(name) ơi, \(amount)ml nè!")
             }
         default:
             if progress >= 1 {
-                return ("🎉 Tuyệt vời!", "\(name) đã uống đủ nước hôm nay! 💪")
+                return (" Tuyệt vời!", "\(name) đã uống đủ nước hôm nay! ")
             } else {
-                return ("💧 Cuối ngày", "Uống nốt \(amount)ml trước khi về \(name)!")
+                return ("Cuối ngày", "Uống nốt \(amount)ml trước khi về \(name)!")
             }
         }
     }
@@ -234,7 +234,7 @@ class NotificationManager: ObservableObject {
         guard isAuthorized else { return }
         
         let content = UNMutableNotificationContent()
-        content.title = "📋 Nhắc việc"
+        content.title = "Nhắc việc"
         content.body = task.title
         content.sound = .default
         content.categoryIdentifier = "TASK_REMINDER"
@@ -479,7 +479,7 @@ class NotificationManager: ObservableObject {
         guard isAuthorized else { return }
         
         let content = UNMutableNotificationContent()
-        content.title = "💧 Nhắc lại"
+        content.title = "Nhắc lại"
         content.body = "Đã snooze xong, uống nước đi nào!"
         content.sound = .default
         
@@ -497,13 +497,13 @@ class NotificationManager: ObservableObject {
     func setupNotificationCategories() {
         let snoozeAction = UNNotificationAction(
             identifier: "SNOOZE",
-            title: "⏰ Nhắc sau 10 phút",
+            title: "Nhắc sau 10 phút",
             options: []
         )
         
         let drinkAction = UNNotificationAction(
             identifier: "DRINK",
-            title: "💧 Đã uống",
+            title: "Đã uống",
             options: []
         )
         

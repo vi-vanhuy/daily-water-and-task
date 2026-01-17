@@ -37,9 +37,9 @@ enum AppTone: String, Codable, CaseIterable {
     
     var icon: String {
         switch self {
-        case .calm: return "😊"
+        case .calm: return ""
         case .focus: return "💼"
-        case .friendly: return "🔥"
+        case .friendly: return ""
         }
     }
     
@@ -136,13 +136,13 @@ class ProfileManager: ObservableObject {
     private func getFriendlyGreeting(hour: Int, name: String) -> String {
         switch hour {
         case 5..<12:
-            return "Chào \(name)! Bắt đầu ngày mới thôi nào 💪"
+            return "Chào \(name)! Bắt đầu ngày mới thôi nào "
         case 12..<14:
-            return "Nghỉ trưa chút đi \(name)! 🍜"
+            return "Nghỉ trưa chút đi \(name)! "
         case 14..<18:
-            return "Chiều rồi \(name), cố lên một chút nữa! ✨"
+            return "Chiều rồi \(name), cố lên một chút nữa! "
         case 18..<22:
-            return "Xong việc chưa \(name)? Nghỉ ngơi thôi 🌙"
+            return "Xong việc chưa \(name)? Nghỉ ngơi thôi "
         default:
             return "Khuya rồi \(name), ngủ sớm nha 😴"
         }
@@ -171,11 +171,11 @@ class ProfileManager: ObservableObject {
             
         case .friendly:
             if progress >= 1 {
-                return "Tuyệt vời! Xong hết rồi \(profile.displayName)! 🎉"
+                return "Tuyệt vời! Xong hết rồi \(profile.displayName)! "
             } else if progress >= 0.7 {
-                return "Sắp xong rồi, cố lên! 💪"
+                return "Sắp xong rồi, cố lên! "
             } else if progress >= 0.5 {
-                return "Được nửa rồi đó! ✨"
+                return "Được nửa rồi đó! "
             }
             return nil
         }
@@ -202,9 +202,9 @@ class ProfileManager: ObservableObject {
             
         case .friendly:
             if progress >= 1 {
-                return "Uống đủ nước rồi! Giỏi lắm 💧"
+                return "Uống đủ nước rồi! Giỏi lắm "
             } else if progress >= 0.75 {
-                return "Một chút nữa là đủ 2L rồi! 💧"
+                return "Một chút nữa là đủ 2L rồi! "
             } else if progress >= 0.5 {
                 return "Được nửa rồi, uống tiếp nha!"
             }
