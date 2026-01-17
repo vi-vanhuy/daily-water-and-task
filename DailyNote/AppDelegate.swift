@@ -50,14 +50,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
         
         if let button = statusItem?.button {
-            // Use app icon for menu bar
-            if let appIcon = NSImage(named: NSImage.applicationIconName) {
-                let resizedIcon = NSImage(size: NSSize(width: 18, height: 18), flipped: false) { rect in
-                    appIcon.draw(in: rect)
-                    return true
-                }
-                resizedIcon.isTemplate = false
-                button.image = resizedIcon
+            // Use custom menu bar icon from Assets
+            if let menuBarIcon = NSImage(named: "MenuBarIcon") {
+                menuBarIcon.size = NSSize(width: 18, height: 18)
+                button.image = menuBarIcon
             }
             button.action = #selector(menuBarIconClicked)
             button.target = self
