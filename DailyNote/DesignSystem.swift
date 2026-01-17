@@ -33,29 +33,8 @@ class ThemeManager: ObservableObject {
             currentMode = .stressed
         }
         
-        // Update app icon to match theme
-        updateAppIcon()
-        
         // Force UI refresh
         objectWillChange.send()
-    }
-    
-    // MARK: - Dynamic App Icon
-    private func updateAppIcon() {
-        let iconName: String
-        switch currentMode {
-        case .relaxed:
-            iconName = "owl_relaxed"
-        case .stressed:
-            iconName = "owl_stressed"
-        case .normal:
-            iconName = "owl_work"
-        }
-        
-        // Set app icon dynamically
-        if let image = NSImage(named: iconName) {
-            NSApp.applicationIconImage = image
-        }
     }
 }
 
